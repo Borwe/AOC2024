@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "./utils.h"
+#include "./vec_utils.h"
 #include <stdlib.h>
 
 const int get_smallest(uint *used, uint *arr, ulong size){

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "./utils.h"
+#include "./vec_utils.h"
 #include <stdlib.h>
 
 const uint sum_split_diffs(Vec *left,Vec *right){

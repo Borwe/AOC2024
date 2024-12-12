@@ -18,6 +18,7 @@ endfunction()
 
 create_day_target(1 ./src/day1.c ./data/day1.txt)
 create_day_target(1.5 ./src/day1.5.c ./data/day1.txt)
+create_day_target(2 ./src/day2.c ./data/day2.txt)
 
 add_custom_target(run ALL
         DEPENDS ${PROJECT_NAME}

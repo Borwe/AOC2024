@@ -46,6 +46,7 @@ void vec_insert(Vec *vec, void *item){
 /** Doubles memory **/
 void vec_grow(Vec *vec){
   void *new_mem = malloc(vec->mem_size * 2);
+  memset(new_mem,0,vec->mem_size*2);
   memcpy(new_mem, vec->memory, vec->mem_size * 2);
   free(vec->memory);
   vec->memory = new_mem;
@@ -58,6 +59,11 @@ bool vec_will_fill_after_add(Vec *vec,int count){
     return true;
   }
   return false;
+}
+
+void vec_clean(Vec *vec){
+  memset(vec->memory,0,vec->mem_size);
+  vec->size = 0;
 }
 
 Vec *vec_new(unsigned count, char *typed, ulong type_size){
