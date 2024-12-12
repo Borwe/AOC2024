@@ -16,7 +16,7 @@ function(create_day_target target_name source_file day_file)
         )
 endfunction()
 
-create_day_target(1 ./src/day1.c ./data/day1t.txt)
+create_day_target(1 ./src/day1.c ./data/day1.txt)
 
 add_custom_target(run ALL
         DEPENDS ${PROJECT_NAME}

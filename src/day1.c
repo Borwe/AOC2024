@@ -1,5 +1,62 @@
 #include <stdio.h>
 #include "./utils.h"
+#include <stdlib.h>
+
+const int get_smallest(uint *used, uint *arr, ulong size){
+  int small = -1;
+  int final_index = -1;
+
+  for(ulong i = 0; i<size;i++){
+    //printf("%d ",arr[i]);
+  }
+    //printf("\n");
+
+  for(int i = 0; i<size;i++){
+    if(small == -1 && used[i] != 1){
+      small = arr[i];
+      final_index = i;
+      //printf("SET S: %d\n",small);
+    }
+
+    if(small!= -1 && small > arr[i] && used[i] != 1){
+      small = arr[i];
+      final_index = i;
+      //printf("FOUND %d fin: %d\n",small, final_index);
+    }
+  }
+
+  //meaning no unused small
+  if(final_index==-1){
+    return -1;
+  }
+  used[final_index] = 1;
+  return small;
+}
+
+const uint sum_split_diffs(Vec *left,Vec *right){
+  uint sum = 0;
+  uint *left_arr = vec_get_mem(left,uint);
+  uint *right_arr = vec_get_mem(right,uint);
+  uint *usedr = calloc(right->size,sizeof(uint));
+  uint *usedl = calloc(left->size,sizeof(uint));
+
+  bool all_usedl = false;
+
+  while(!all_usedl){
+    const int smalll = get_smallest(usedl,left_arr, left->size);
+    const int smallr = get_smallest(usedr,right_arr, right->size);
+    //printf("l: %d r: %d ls: %d rs: %d\n",smalll,smallr, left->size, right->size);
+    if(smalll == -1 || smallr == -1){
+      all_usedl = true;
+      continue;
+    }
+    sum += abs(smalll-smallr);
+  }
+
+  free(usedr);
+  free(usedl);
+  return sum;
+}
 
 void split_line_to_sides(Vec *left, Vec*right,
                          const char *line, uint len){
@@ -17,11 +74,19 @@ void split_line_to_sides(Vec *left, Vec*right,
       }
     }
   }
-  char *leftstr = calloc(7,1);
-  memcpy(leftstr, line, 7);
-  char *rightstr = calloc(len-end, 1);
-  memcpy(leftstr, line-end, len-end);
-  printf("%s %s ->%s start: %d end: %d\n",line,leftstr, rightstr,start,end);
+  char *leftstr = calloc(start,1);
+  memcpy(leftstr, line, start);
+  char *rightstr = calloc(len-end-1, 1);
+  memcpy(rightstr, line+(len - (len -end)), len-end-1);
+  uint leftnmr = atoi(leftstr);
+  uint rightnmr = atoi(rightstr);
+  free(leftstr);
+  free(rightstr);
+  //printf("%d->%d start: %d end: %d len; %d\n",
+  //       leftnmr, rightnmr,start,end,len);
+
+  vec_add(left, &leftnmr);
+  vec_add(right, &rightnmr);
 }
 
 int main(int argc, char **argv){
@@ -43,7 +108,9 @@ int main(int argc, char **argv){
     split_line_to_sides(left,right,line, read);
   }
 
-  printf("Opened %s",argv[1]);
+  const uint sum = sum_split_diffs(left,right);
+
+  printf("SUM of Diffs %d",sum);
   fclose(f);
   return 0;
 }
