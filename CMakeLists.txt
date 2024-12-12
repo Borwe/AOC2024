@@ -7,6 +7,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(${PROJECT_NAME} ./src/hello.c)
 
+function(create_day_target target_name source_file day_file)
+        add_executable(${target_name} ${source_file})
+        add_custom_target(day${target_name}
+                COMMAND ${target_name} ${day_file}
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+
+        )
+endfunction()
+
+create_day_target(1 ./src/day1.c ./data/day1t.txt)
+
 add_custom_target(run ALL
         DEPENDS ${PROJECT_NAME}
         COMMAND ${PROJECT_NAME}
