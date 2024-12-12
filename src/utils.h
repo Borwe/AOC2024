@@ -17,6 +17,7 @@ Vec *vec_new(unsigned count, char *typed, ulong type_size);
 bool vec_will_fill_after_add(Vec *vec,int count);
 void vec_grow(Vec *vec);
 void vec_insert(Vec *vec, void *item);
+void vec_free(Vec *vec);
 
 #define vec_new_typed(type, count)\
   vec_new(count, #type, sizeof(type))
@@ -30,6 +31,11 @@ void vec_insert(Vec *vec, void *item);
     vec_grow(vec);\
   }\
   vec_insert(vec, (void *)item)
+
+void vec_free(Vec *vec){
+  free(vec->memory);
+  free(vec);
+}
 
 void vec_insert(Vec *vec, void *item){
   void *start = vec->memory + (vec->size * vec->type_size);

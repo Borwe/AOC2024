@@ -110,7 +110,9 @@ int main(int argc, char **argv){
 
   const uint sum = sum_split_diffs(left,right);
 
-  printf("SUM of Diffs %d",sum);
+  printf("SUM of Diffs %d\n",sum);
   fclose(f);
+  vec_free(right);
+  vec_free(left);
   return 0;
 }
