@@ -20,6 +20,7 @@ create_day_target(1 ./src/day1.c ./data/day1.txt)
 create_day_target(1.5 ./src/day1.5.c ./data/day1.txt)
 create_day_target(2 ./src/day2.c ./data/day2.txt)
 create_day_target(2.5 ./src/day2.5.c ./data/day2.txt)
+create_day_target(3 ./src/day3.c ./data/day3.txt)
 
 add_custom_target(run ALL
         DEPENDS ${PROJECT_NAME}
