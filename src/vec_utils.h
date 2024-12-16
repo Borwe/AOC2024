@@ -4,6 +4,7 @@
 #include<stdlib.h>
 #include<stdbool.h>
 #include<string.h>
+#include<stdio.h>
 
 typedef struct Vec{
   unsigned size;
@@ -51,6 +52,36 @@ void vec_grow(Vec *vec){
   free(vec->memory);
   vec->memory = new_mem;
   vec->mem_size *= 2;
+}
+
+Vec *vec_clone(Vec *vec){
+  Vec *vc = calloc(1, sizeof(Vec));
+  vc->size = vec->size;
+  vc->type_size = vec->type_size;
+  vc->mem_size = vec->mem_size;
+  vc->type = vec->type;
+  vc->memory = malloc(vc->mem_size);
+  memcpy(vc->memory,vec->memory,vc->mem_size);
+  return vc;
+}
+
+void vec_remove(Vec *vec, void *d){
+  void *end = vec->memory + (vec->size * vec->type_size);
+
+  //printf("START: %p D: %p END: %p\n",
+  //       vec->memory, d, end);
+  if(d>=vec->memory && d <end){
+    void *start = d + vec->type_size;
+    memmove(d,start,end-start);
+    vec->size -= 1;
+    return;
+  }
+  if(d == end){
+    vec->size -=1;
+    return;
+  }
+
+  printf("WTF DIDN't DO SHIT!!!\n");
 }
 
 bool vec_will_fill_after_add(Vec *vec,int count){
