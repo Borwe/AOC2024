@@ -5,10 +5,15 @@ project(AOC2024
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(SANITIZE_FLAGS -fsanitize=address,undefined)
+set(COMPILE_FLAGS -Wall -Wextra -Werror -std=c17)
+
 add_executable(${PROJECT_NAME} ./src/hello.c)
 
 function(create_day_target target_name source_file day_file)
         add_executable(${target_name} ${source_file})
+        target_compile_options(${target_name} PRIVATE ${COMPILE_FLAGS} ${SANITIZE_FLAGS})
+        target_link_options(${target_name} PRIVATE ${SANITIZE_FLAGS} -lubsan)
         add_custom_target(day${target_name}
                 COMMAND ${target_name} ${day_file}
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
