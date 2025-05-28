@@ -2,12 +2,13 @@
 #include<ctype.h>
 #include<stdlib.h>
 #include<stdbool.h>
-#include"vec_utils.h"
+#include "./vec_utils.h"
+#include "./utils.h"
 
-Vec *get_nums(const char *line,const int len){
+Vec *get_nums(const char *line,const uint64_t len){
   Vec *nums = vec_new_typed(int, 10);
   Vec *num = vec_new_typed(char,10);
-  for(uint i=0; i< len; i++){
+  for(uint64_t i=0; i< len; i++){
     if(i>0 && line[i]==' ' && isdigit(line[i-1])){
       //we have reached a number
       int n = atoi(vec_get_mem(num,char));
@@ -16,7 +17,7 @@ Vec *get_nums(const char *line,const int len){
     }
 
     if(isdigit(line[i])){
-      vec_add(num,&line[i]);
+      vec_add(num,(void*)&line[i]);
     }
   }
   int n = atoi(vec_get_mem(num,char));
@@ -25,13 +26,13 @@ Vec *get_nums(const char *line,const int len){
   return nums;
 }
 
-bool check_if_valid(const char *line,const int len){
+bool check_if_valid(const char *line,const uint64_t len){
   Vec *nums = get_nums(line, len);
   int *nms = vec_get_mem(nums, int);
   bool answer = true;
 
   bool is_acc = nums->size>0?nms[0]<nms[1]:false;
-  for(uint i=0;i<nums->size; i++){
+  for(uint64_t i=0;i<nums->size; i++){
     if(is_acc && i>0 && nms[i-1] > nms[i]){
       answer = false;
       break;
@@ -54,25 +55,21 @@ bool check_if_valid(const char *line,const int len){
 }
 
 int main(int argc, char **argv){
-  FILE *f = fopen(argv[1], "r");
-  if(f==NULL){
-    char msg[512];
-    int size = snprintf(msg,512,"Couldn't open %s\n", argv[1]);
-    perror(msg);
-    return -1;
-  }
+  (void)argc;
+  Lines lines = utils_prepare_read_lines_from_file(argv[1],1024);
 
   char *line = NULL;
-  ulong width = 1024;
   int read = -1;
 
-  uint valids = 0;
-  while((read = getline(&line, &width, f)) && read != -1){
+  uint64_t valids = 0;
+  while((line = utils_next_line(&lines)) && line != NULL){
+    read = strlen(line);
     if(check_if_valid(line, read)) valids++;
+    read = -1;
   }
 
-  printf("Valid reports: %d\n",valids);
-  fclose(f);
+  printf("Valid reports: %lu\n",valids);
+  utils_free_lines(&lines);
 
   return 0;
 }
