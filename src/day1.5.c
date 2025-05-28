@@ -1,18 +1,21 @@
+#include <stdint.h>
 #include <stdio.h>
 #include "./vec_utils.h"
+#include "./utils.h"
 #include <stdlib.h>
+#include <string.h>
 
-const uint sum_split_diffs(Vec *left,Vec *right){
-  uint sum = 0;
-  uint *left_arr = vec_get_mem(left,uint);
-  uint *right_arr = vec_get_mem(right,uint);
+uint64_t sum_split_diffs(Vec *left,Vec *right){
+  uint64_t sum = 0;
+  uint64_t *left_arr = vec_get_mem(left,uint64_t);
+  uint64_t *right_arr = vec_get_mem(right,uint64_t);
 
-  Vec *checked = vec_new_typed(uint,6);
+  Vec *checked = vec_new_typed(uint64_t,6);
 
-  for(uint i = 0; i < left->size; i++ ){
-    uint *chkd = vec_get_mem(checked, uint);
+  for(uint64_t i = 0; i < left->size; i++ ){
+    uint64_t *chkd = vec_get_mem(checked, uint64_t);
     bool already_chkd = false;
-    for(uint j = 0; j< checked->size; j++){
+    for(uint64_t j = 0; j< checked->size; j++){
       if(left_arr[i]==chkd[j]){
         already_chkd = true;
         break;
@@ -22,8 +25,8 @@ const uint sum_split_diffs(Vec *left,Vec *right){
     if(already_chkd) continue;
 
     //chck for count
-    uint counts = 0;
-    for(uint j=0;j<right->size;j++){
+    uint64_t counts = 0;
+    for(uint64_t j=0;j<right->size;j++){
       if(left_arr[i] == right_arr[j]){
         counts++;
       }
@@ -31,14 +34,16 @@ const uint sum_split_diffs(Vec *left,Vec *right){
     sum+=left_arr[i]*counts;
   }
 
+  vec_free(checked);
+
   return sum;
 }
 
 void split_line_to_sides(Vec *left, Vec*right,
-                         const char *line, uint len){
+                         const char *line, uint64_t len){
   int start =-1 ; //start of spaces
   int end = -1; //end of spaces
-  for(uint i = 0; i<len; i++){
+  for(uint64_t i = 0; i<len; i++){
     if(start == -1){
       if(line[i] == ' '){
         start = i;
@@ -50,12 +55,12 @@ void split_line_to_sides(Vec *left, Vec*right,
       }
     }
   }
-  char *leftstr = calloc(start,1);
+  char *leftstr = calloc(start+1,1);
   memcpy(leftstr, line, start);
-  char *rightstr = calloc(len-end-1, 1);
+  char *rightstr = calloc(len-end, 1);
   memcpy(rightstr, line+(len - (len -end)), len-end-1);
-  uint leftnmr = atoi(leftstr);
-  uint rightnmr = atoi(rightstr);
+  uint64_t leftnmr = atoi(leftstr);
+  uint64_t rightnmr = atoi(rightstr);
   free(leftstr);
   free(rightstr);
   //printf("%d->%d start: %d end: %d len; %d\n",
@@ -66,28 +71,22 @@ void split_line_to_sides(Vec *left, Vec*right,
 }
 
 int main(int argc, char **argv){
-  FILE *f = fopen(argv[1],"r");
-  if(f== NULL){
-    char msg[512];
-    int size = snprintf(msg,512,"Couldn't open %s\n", argv[1]);
-    perror(msg);
-    return -1;
-  }
+  (void)argc;
+  Lines lines = utils_prepare_read_lines_from_file(argv[1], 512);
 
-  Vec *left = vec_new_typed(uint, 100);
-  Vec *right = vec_new_typed(uint, 100);
+  Vec *left = vec_new_typed(uint64_t, 100);
+  Vec *right = vec_new_typed(uint64_t, 100);
+
   char *line = NULL;
-  ulong width = 1024;
-
-  long read = 0;
-  while((read = getline(&line, &width, f)) && read != -1){
+  while((line = utils_next_line(&lines)) && line != NULL){
+    uint64_t read = strlen(line);;
     split_line_to_sides(left,right,line, read);
   }
 
-  const uint sum = sum_split_diffs(left,right);
+  const uint64_t sum = sum_split_diffs(left,right);
 
-  printf("SUM of times %d\n",sum);
-  fclose(f);
+  printf("SUM of times %lu\n",sum);
+  utils_free_lines(&lines);
   vec_free(right);
   vec_free(left);
   return 0;

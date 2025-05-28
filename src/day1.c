@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "./vec_utils.h"
+#include "./utils.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -83,31 +84,19 @@ void split_line_to_sides(Vec *left, Vec*right, const char *line, uint64_t len){
   uint64_t rightnmr = atoi(rightstr);
   free(leftstr);
   free(rightstr);
-  //printf("%d->%d start: %d end: %d len; %d\n",
-  //       leftnmr, rightnmr,start,end,len);
-
   vec_add(left, &leftnmr);
   vec_add(right, &rightnmr);
 }
 
 int main(int argc , char **argv){
   (void)argc;
-  FILE *f = fopen(argv[1],"r");
-  if(f== NULL){
-    char msg[512];
-    snprintf(msg,512,"Couldn't open %s\n", argv[1]);
-    perror(msg);
-    return -1;
-  }
+  Lines lines = utils_prepare_read_lines_from_file(argv[1], 1024);
 
   Vec *left = vec_new_typed(uint64_t, 100);
   Vec *right = vec_new_typed(uint64_t, 100);
-  const uint64_t width = 1024;
-  char line_buf[width] ;
 
   char *line = NULL;
-  
-  while((line = fgets(line_buf, width, f)) && line != NULL){
+  while((line = utils_next_line(&lines)) && line != NULL){
     const int read = strlen(line);
     split_line_to_sides(left,right,line, read);
   }
@@ -115,7 +104,7 @@ int main(int argc , char **argv){
   const uint64_t sum = sum_split_diffs(left,right);
 
   printf("SUM of Diffs %lu\n",sum);
-  fclose(f);
+  utils_free_lines(&lines);
   vec_free(right);
   vec_free(left);
   return 0;

@@ -1,6 +1,6 @@
 #include <stdint.h>
-#ifndef AOC_UTILS
-#define AOC_UTILS 1
+#ifndef AOC_VEC_UTILS
+#define AOC_VEC_UTILS 1
 
 #include<stdlib.h>
 #include<stdbool.h>
