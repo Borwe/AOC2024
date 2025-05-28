@@ -3,18 +3,22 @@
 #include<stdlib.h>
 #include<stdbool.h>
 #include"vec_utils.h"
+#include "./utils.h"
 
-int get_mults(char *line, ulong width){
-  int result =0;
+int get_mults(char *line, uint64_t width){
+  uint64_t result =0;
   static const char *mul = "mul(";
-  Vec *numchar1 = vec_new_typed(char, 3);
-  Vec *numchar2= vec_new_typed(char, 3);
+  Vec *numchar1 = vec_new_typed(char, 3+1);
+  Vec *numchar2= vec_new_typed(char, 3+1);
 
-  for(uint i = 0; i< width; i++){
-    if(memcmp(line+i,mul,4) == 0){
+  const uintptr_t start = (uintptr_t)line;
+  const uintptr_t end = start + width;
+
+  for(uint64_t i = 0; i< width; i++){
+    if(start+i+4 < end && memcmp(line+i,mul,4) == 0){
       i+=4;
       bool comma = false;
-      for(int j = i;j<width; j++,i=j){
+      for(uint64_t j = i;j<width; j++,i=j){
         if(*(line+j)==','){
           comma = true;
           continue;
@@ -31,8 +35,8 @@ int get_mults(char *line, ulong width){
         break;
       }
       if(*(line+i)==')' && numchar1->size <= 3 && numchar2->size <= 3){
-        int left = atoi(vec_get_mem(numchar1,char));
-        int right = atoi(vec_get_mem(numchar2,char));
+        uint64_t left = atoi(vec_get_mem(numchar1,char));
+        uint64_t right = atoi(vec_get_mem(numchar2,char));
         //printf("got: %d, %d\n",left,right);
         result=result + (left*right);
       }
@@ -46,26 +50,22 @@ int get_mults(char *line, ulong width){
 }
 
 int main(int argc, char **argv){
-  FILE *f = fopen(argv[1], "r");
-  if(f==NULL){
-    char msg[512];
-    int size = snprintf(msg,512,"Couldn't open %s\n", argv[1]);
-    perror(msg);
-    return -1;
-  }
+  (void)argc;
+  Lines lines = utils_prepare_read_lines_from_file(argv[1], 3*1024);
 
   char *line = NULL;
-  ulong width = 1024 * 1024 * 1024;
   int read = -1;
 
-  int sum = 0;
-  while((read = getline(&line, &width, f)) && read != -1){
+  uint64_t sum = 0;
+  while((line = utils_next_line(&lines)) && line != NULL){
+    read = strlen(line);
     sum += get_mults(line,read);
+    read = -1;
     //printf("LINE: %s",line);
   }
 
-  printf("SUMS: %d\n",sum);
-  fclose(f);
+  printf("SUMS: %lu\n",sum);
+  utils_free_lines(&lines);
 
   return 0;
 }

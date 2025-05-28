@@ -36,8 +36,12 @@ void vec_add(Vec * const vec, void *item){
 }
 
 void vec_free(Vec *vec){
-  free(vec->memory);
-  free(vec);
+  if(vec != NULL){
+    if(vec->memory != NULL){
+      free(vec->memory);
+    }
+    free(vec);
+  }
 }
 
 void vec_insert(Vec *vec, void *item){

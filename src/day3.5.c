@@ -2,20 +2,22 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdbool.h>
-#include"vec_utils.h"
+#include <string.h>
+#include "./vec_utils.h"
+#include "./utils.h"
 
-int get_mults(char *line, ulong width, bool *enabled){
+int get_mults(char *line, uint64_t width, bool *enabled){
   int result =0;
 
   static const char *mul = "mul(";
   static const char *dos = "do()";
   static const char *donts = "don\'t()";
 
-  Vec *numchar1 = vec_new_typed(char, 3);
-  Vec *numchar2= vec_new_typed(char, 3);
+  Vec *numchar1 = vec_new_typed(char, 4);
+  Vec *numchar2= vec_new_typed(char, 4);
 
 
-  for(uint i = 0; i< width; i++){
+  for(uint64_t  i = 0; i< width; i++){
     if(memcmp(line+i,donts,7) == 0){
       *enabled = false;
     }else if(memcmp(line+i,dos,4) == 0){
@@ -26,7 +28,7 @@ int get_mults(char *line, ulong width, bool *enabled){
         continue;
       }
       bool comma = false;
-      for(int j = i;j<width; j++,i=j){
+      for(uint64_t j = i;j<width; j++,i=j){
         if(*(line+j)==','){
           comma = true;
           continue;
@@ -58,27 +60,23 @@ int get_mults(char *line, ulong width, bool *enabled){
 }
 
 int main(int argc, char **argv){
-  FILE *f = fopen(argv[1], "r");
-  if(f==NULL){
-    char msg[512];
-    int size = snprintf(msg,512,"Couldn't open %s\n", argv[1]);
-    perror(msg);
-    return -1;
-  }
+  (void)argc;
+  Lines lines = utils_prepare_read_lines_from_file(argv[1], 1024*1024*1024);
 
   char *line = NULL;
-  ulong width = 1024 * 1024 * 1024;
   int read = -1;
 
   int sum = 0;
   bool enabled = true;
-  while((read = getline(&line, &width, f)) && read != -1){
+  while((line = utils_next_line(&lines)) && line != NULL){
+    read = strlen(line);
     sum += get_mults(line,read, &enabled);
+    read = -1;
     //printf("LINE: %s",line);
   }
 
   printf("SUMS: %d\n",sum);
-  fclose(f);
+  utils_free_lines(&lines);
 
   return 0;
 }
